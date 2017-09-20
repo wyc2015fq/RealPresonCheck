@@ -1,0 +1,6 @@
+framework module RMSDMLandMark {
+  umbrella header "RMSDMLandMark.h"
+
+  export *
+  module * { export * }
+}
