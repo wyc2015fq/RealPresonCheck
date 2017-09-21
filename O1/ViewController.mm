@@ -14,6 +14,7 @@
 #import "UIImage+Helper.h"
 #import <Photos/Photos.h>
 #import "RMFace.h"
+#import <AudioToolbox/AudioToolbox.h>
 #define TICK(time) NSDate *time = [NSDate date]
 #define TOCK(time) NSLog(@"%s: %f", #time, -[time timeIntervalSinceNow] * 1000)
 
@@ -32,8 +33,11 @@
 @property (nonatomic,strong) UILabel *poseResultLabel;
 @property (nonatomic,strong) UILabel *infoLabel;
 @property (nonatomic) int count;
+@property (nonatomic) int savePic2CameraRollCount;
 @property (nonatomic,strong) NSArray *rmFaceArray;
 @property (nonatomic) int hasFinishStatus;
+@property (nonatomic) dispatch_queue_t queue;
+@property (nonatomic) BOOL allowNext;
 @end
 
 
@@ -43,6 +47,7 @@
     [super viewDidLoad];
     self.count = 0;
     self.hasFinishStatus = 0;
+    self.queue = dispatch_queue_create("com.duanhai.test", NULL);
     NSString *path = [[NSBundle mainBundle] resourcePath];
     rm_result_t rt = rm_mobile_tracker_106_create(path.UTF8String,0,&handle);
     if(rt != RM_OK)
@@ -57,21 +62,25 @@
     face0.name = @"眨眼";
     face0.faceAction = 0x00000002;
     face0.info = @"请眨眼";
+    face0.audioName = @"blink";
     
     RMFace *face1 = [[RMFace alloc] init];
     face1.name = @"摇头";
     face1.faceAction = 0x00000008;
     face1.info = @"请摇头";
+    face1.audioName = @"head_yaw";
     
     RMFace *face2 = [[RMFace alloc] init];
     face2.name = @"点头";
     face2.faceAction = 0x00000010;
     face2.info = @"请点头";
+    face2.audioName = @"head_pitch";
     
     RMFace *face3= [[RMFace alloc] init];
     face3.name = @"张嘴";
     face3.faceAction = 0x0000004;
     face3.info = @"请张嘴";
+    face3.audioName = @"open_mouth";
 
     
     NSArray *originArray = @[face0,face1,face2,face3];
@@ -79,6 +88,13 @@
     self.rmFaceArray = [self getRandomServiceWithList:originArray];
     
     [self setupAndStartCapture];
+    
+    //延时一定时间后开启下一帧检测开关
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        self.allowNext = YES;
+    });
+    
+    
     // Do any additional setup after loading the view, typically from a nib.
 }
 
@@ -126,61 +142,46 @@
                                            CHECK_FLAG(iFaceAction, RM_MOBILE_MOUTH_AH),
                                            CHECK_FLAG(iFaceAction, RM_MOBILE_HEAD_YAW),
                                            CHECK_FLAG(iFaceAction, RM_MOBILE_HEAD_PITCH)];
-//        NSLog(@"%d",CHECK_FLAG(iFaceAction, RM_MOBILE_EYE_BLINK));
-//        if (CHECK_FLAG(iFaceAction, RM_MOBILE_MOUTH_AH))
-        {
-            NSLog(@"----");
-//            CIImage *ciImage = [CIImage imageWithCVPixelBuffer:pixelBuffer];
-//
-//            CIContext *temporaryContext = [CIContext contextWithOptions:nil];
-//            CGImageRef videoImage = [temporaryContext
-//                                     createCGImage:ciImage
-//                                     fromRect:CGRectMake(0, 0,
-//                                                         CVPixelBufferGetWidth(pixelBuffer),
-//                                                         CVPixelBufferGetHeight(pixelBuffer))];
-//
-//            UIImage *trackIamge = [UIImage imageWithCGImage:videoImage];
-//            trackIamge = [trackIamge rotate:UIImageOrientationRightMirrored];
-//            self.count ++;
-//            if (self.count == 3){
-//                [self saveVideoToLibrary:trackIamge];
-//                self.count = 0;
-//            }
-            
-//            CGImageRelease(videoImage);
-            
-            self.count ++;
-            if (self.count < 6){
-                return;
-            }else {
-                self.count == 0;
-            }
-            
-            if (self.rmFaceArray.count > 0 && self.hasFinishStatus < 4) {
-                RMFace *aFace = self.rmFaceArray[self.hasFinishStatus];
-                if (CHECK_FLAG(iFaceAction, aFace.faceAction)) {
-                    aFace.checkStatus = YES;
-                    self.hasFinishStatus ++;
+        
+                //间隔5帧判断一次
+                self.count ++;
+                if (self.count < 6){
+                    return;
+                }else {
+                    self.count == 0;
                 }
                 
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    self.infoLabel.text = aFace.info;
-                });
+                if (self.rmFaceArray.count > 0 && self.hasFinishStatus < 4) {
+                    RMFace *aFace = self.rmFaceArray[self.hasFinishStatus];
+                   
+                    //播放语音
+                    if(!aFace.checkStatus){
+                        aFace.checkStatus = YES;
+                        [self playAudio:aFace.audioName];
+                    }
+                    
+                    if (self.allowNext) {
+                        if (CHECK_FLAG(iFaceAction, aFace.faceAction)) {
+                            self.hasFinishStatus ++;
+                        }
+                        self.allowNext = NO;
+                        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                            self.allowNext = YES;
+                        });
+                    }
+                    NSLog(@"---%d",iFaceAction);
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        self.infoLabel.text = aFace.info;
+                    });
+                }
                 
-            }
-            
-            if(self.hasFinishStatus == 4) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    self.infoLabel.text = @"已经通过活体检测";
-                });
-            }
-            
-            
-            
-            
-            
-            
-        }
+                if(self.hasFinishStatus == 4) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        self.infoLabel.text = @"验证通过";
+                        [self playAudio:@"check_success"];
+                        self.hasFinishStatus ++;
+                    });
+                }
         
         dispatch_async(dispatch_get_main_queue(), ^{
             self.poseResultLabel.hidden = NO;
@@ -193,14 +194,10 @@
         
         dispatch_async(dispatch_get_main_queue(), ^{
             self.poseResultLabel.hidden = YES;
-
         } );
     }
     
-    
-    
     CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-    
     
     
 }
@@ -240,11 +237,24 @@
     [self.view addSubview:self.poseResultLabel];
     
     
-    self.infoLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.poseResultLabel.frame.origin.x, self.poseResultLabel.frame.origin.y+100, 200, 40)];
-    self.infoLabel.textColor = [UIColor redColor];
-    self.infoLabel.text = @"请正对屏幕保持一定距离依据提示做动作";
-    [self.view addSubview:self.infoLabel];
+
     
+    
+    UIImageView *coverCircle = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
+    coverCircle.image = [UIImage imageNamed:@"Combined Shape"];
+    [self.view addSubview:coverCircle];
+    
+    UIImageView *labelCoverView = [[UIImageView alloc] initWithFrame:CGRectMake(self.view.frame.size.width/2 - 210/2, 470, 210, 72)];
+    labelCoverView.image = [UIImage imageNamed:@"button"];
+    [self.view addSubview:labelCoverView];
+    
+    self.infoLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 15, 200, 40)];
+    self.infoLabel.textColor = [UIColor whiteColor];
+    self.infoLabel.textAlignment = NSTextAlignmentCenter;
+    self.infoLabel.font = [UIFont boldSystemFontOfSize:14];
+    self.infoLabel.text = @"请讲人脸放入原型框内";
+    [labelCoverView addSubview:self.infoLabel];
+
     
     NSArray *devices = [AVCaptureDevice devices];
     for (AVCaptureDevice *device in devices) {
@@ -271,7 +281,6 @@
     AVCaptureVideoDataOutput * dataOutput = [[AVCaptureVideoDataOutput alloc] init];
     
     [dataOutput setAlwaysDiscardsLateVideoFrames:YES];
-    
     [dataOutput setVideoSettings:@{(id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)}];
     dispatch_queue_t queue = dispatch_queue_create("dataOutputQueue", NULL);
     [dataOutput setSampleBufferDelegate:self queue:queue];
@@ -295,6 +304,51 @@
     // Dispose of any resources that can be recreated.
 }
 
+
+
+#pragma mark - 随机排序
+- (NSArray*)getRandomServiceWithList:(NSArray*)array
+{
+    NSMutableSet *randomSet = [[NSMutableSet alloc] init];
+    while ([randomSet count] < 4) {
+        int r = arc4random() % [array count];
+        [randomSet addObject:[array objectAtIndex:r]];
+    }
+    return [randomSet allObjects];
+}
+
+#pragma mark - 播放系统声音
+- (void)playAudio:(NSString *)name {
+    SystemSoundID ID;
+    NSURL *url = [[NSBundle mainBundle] URLForResource:name withExtension:@"mp3"];
+    AudioServicesCreateSystemSoundID((__bridge CFURLRef _Nonnull)(url), &ID);
+    AudioServicesPlayAlertSound(ID);
+}
+
+#pragma mark - 截取图片到相册
+- (void)savePic2CameraRoll:(CVPixelBufferRef)pixelBuffer {
+    
+                CIImage *ciImage = [CIImage imageWithCVPixelBuffer:pixelBuffer];
+                CIContext *temporaryContext = [CIContext contextWithOptions:nil];
+                CGImageRef videoImage = [temporaryContext
+                                         createCGImage:ciImage
+                                         fromRect:CGRectMake(0, 0,
+                                                             CVPixelBufferGetWidth(pixelBuffer),
+                                                             CVPixelBufferGetHeight(pixelBuffer))];
+    
+                UIImage *trackIamge = [UIImage imageWithCGImage:videoImage];
+                trackIamge = [trackIamge rotate:UIImageOrientationRightMirrored];
+                self.savePic2CameraRollCount ++;
+                if (self.savePic2CameraRollCount == 3){
+                    [self saveVideoToLibrary:trackIamge];
+                    self.savePic2CameraRollCount = 0;
+                }
+                CGImageRelease(videoImage);
+    
+    
+}
+
+#pragma mark - 保存图片到相册
 - (void)saveVideoToLibrary:(UIImage *)image
 {
     [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
@@ -311,7 +365,7 @@
             }
                                               completionHandler:^(BOOL success, NSError* error) {
                                                   if (!success) {
-                                                      NSLog(@"failed to add movie to Photos library: %@", error.description);
+                                                      NSLog(@"failed to add pictures to Photos library: %@", error.description);
                                                   }else {
                                                       
                                                       UIAlertController *alertCtr = [UIAlertController alertControllerWithTitle:@"" message:@"Save successfully" preferredStyle:UIAlertControllerStyleAlert];
@@ -332,16 +386,6 @@
                                               }];
         }
     }];
-}
-
-- (NSArray*)getRandomServiceWithList:(NSArray*)array
-{
-    NSMutableSet *randomSet = [[NSMutableSet alloc] init];
-    while ([randomSet count] < 4) {
-        int r = arc4random() % [array count];
-        [randomSet addObject:[array objectAtIndex:r]];
-    }
-    return [randomSet allObjects];
 }
 
 

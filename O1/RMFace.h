@@ -11,6 +11,7 @@
 @interface RMFace : NSObject
 @property(nonatomic,copy) NSString *name;
 @property(nonatomic,copy) NSString *info;
-@property(nonatomic) BOOL checkStatus;
+@property(nonatomic,copy) NSString *audioName;
+@property(nonatomic) BOOL checkStatus; //用户控制声音播放
 @property(nonatomic) unsigned int faceAction;
 @end

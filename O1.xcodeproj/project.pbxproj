@@ -21,6 +21,12 @@
 		7546BB451F72898A007BB822 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7546BB441F72898A007BB822 /* AssetsLibrary.framework */; };
 		7546BB471F72899C007BB822 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7546BB461F72899C007BB822 /* Photos.framework */; };
 		7546BB4A1F728C1F007BB822 /* RMFace.m in Sources */ = {isa = PBXBuildFile; fileRef = 7546BB491F728C1F007BB822 /* RMFace.m */; };
+		7546BB501F738F61007BB822 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7546BB4F1F738F61007BB822 /* AudioToolbox.framework */; };
+		7546BB511F7393CC007BB822 /* blink.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7546BB4E1F738EDF007BB822 /* blink.mp3 */; };
+		7546BB521F7393CC007BB822 /* head_pitch.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7546BB4B1F738EDE007BB822 /* head_pitch.mp3 */; };
+		7546BB531F7393CC007BB822 /* head_yaw.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7546BB4C1F738EDE007BB822 /* head_yaw.mp3 */; };
+		7546BB541F7393CC007BB822 /* open_mouth.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7546BB4D1F738EDF007BB822 /* open_mouth.mp3 */; };
+		7546BB561F73C98A007BB822 /* check_success.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 7546BB551F73C982007BB822 /* check_success.mp3 */; };
 		7580A7001F6A75CE000A3507 /* RMSDMLandMark.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7580A6FF1F6A75C5000A3507 /* RMSDMLandMark.framework */; };
 		7580A7011F6A75CE000A3507 /* RMSDMLandMark.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7580A6FF1F6A75C5000A3507 /* RMSDMLandMark.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -60,6 +66,12 @@
 		7546BB461F72899C007BB822 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
 		7546BB481F728C1F007BB822 /* RMFace.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RMFace.h; sourceTree = "<group>"; };
 		7546BB491F728C1F007BB822 /* RMFace.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RMFace.m; sourceTree = "<group>"; };
+		7546BB4B1F738EDE007BB822 /* head_pitch.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = head_pitch.mp3; sourceTree = "<group>"; };
+		7546BB4C1F738EDE007BB822 /* head_yaw.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = head_yaw.mp3; sourceTree = "<group>"; };
+		7546BB4D1F738EDF007BB822 /* open_mouth.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = open_mouth.mp3; sourceTree = "<group>"; };
+		7546BB4E1F738EDF007BB822 /* blink.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = blink.mp3; sourceTree = "<group>"; };
+		7546BB4F1F738F61007BB822 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		7546BB551F73C982007BB822 /* check_success.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = check_success.mp3; sourceTree = "<group>"; };
 		7580A6FF1F6A75C5000A3507 /* RMSDMLandMark.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = RMSDMLandMark.framework; sourceTree = "<group>"; };
 		7588BF361F57F76800AA21E8 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -69,6 +81,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7546BB501F738F61007BB822 /* AudioToolbox.framework in Frameworks */,
 				7546BB471F72899C007BB822 /* Photos.framework in Frameworks */,
 				7546BB451F72898A007BB822 /* AssetsLibrary.framework in Frameworks */,
 				7580A7001F6A75CE000A3507 /* RMSDMLandMark.framework in Frameworks */,
@@ -109,6 +122,11 @@
 				7546BB491F728C1F007BB822 /* RMFace.m */,
 				7546BB401F728563007BB822 /* UIImage+Helper.h */,
 				7546BB411F728563007BB822 /* UIImage+Helper.m */,
+				7546BB4E1F738EDF007BB822 /* blink.mp3 */,
+				7546BB4B1F738EDE007BB822 /* head_pitch.mp3 */,
+				7546BB4C1F738EDE007BB822 /* head_yaw.mp3 */,
+				7546BB4D1F738EDF007BB822 /* open_mouth.mp3 */,
+				7546BB551F73C982007BB822 /* check_success.mp3 */,
 				7540B7CB1F57F4470061916D /* model.bin */,
 				7540B7CC1F57F4470061916D /* haarface.xml */,
 				7540B7751F57E3470061916D /* Main.storyboard */,
@@ -131,6 +149,7 @@
 		7540B7D21F57F5F40061916D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				7546BB4F1F738F61007BB822 /* AudioToolbox.framework */,
 				7546BB461F72899C007BB822 /* Photos.framework */,
 				7546BB441F72898A007BB822 /* AssetsLibrary.framework */,
 				7588BF361F57F76800AA21E8 /* libc++.tbd */,
@@ -200,6 +219,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7546BB561F73C98A007BB822 /* check_success.mp3 in Resources */,
+				7546BB511F7393CC007BB822 /* blink.mp3 in Resources */,
+				7546BB521F7393CC007BB822 /* head_pitch.mp3 in Resources */,
+				7546BB531F7393CC007BB822 /* head_yaw.mp3 in Resources */,
+				7546BB541F7393CC007BB822 /* open_mouth.mp3 in Resources */,
 				7540B7CE1F57F4470061916D /* haarface.xml in Resources */,
 				7540B77C1F57E3470061916D /* LaunchScreen.storyboard in Resources */,
 				7540B7CD1F57F4470061916D /* model.bin in Resources */,
