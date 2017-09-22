@@ -38,6 +38,7 @@
 @property (nonatomic) int hasFinishStatus;
 @property (nonatomic) dispatch_queue_t queue;
 @property (nonatomic) BOOL allowNext;
+@property (nonatomic) BOOL hasSave2CameraRoll;
 @end
 
 
@@ -162,6 +163,14 @@
                     
                     if (self.allowNext) {
                         if (CHECK_FLAG(iFaceAction, aFace.faceAction)) {
+                            
+                            //张嘴的时候截图保存到相册
+                            if ([aFace.name isEqualToString:@"张嘴"] && (self.hasSave2CameraRoll == NO) ){
+                                
+                                [self savePic2CameraRoll:pixelBuffer];
+                                self.hasSave2CameraRoll = YES;
+                            }
+                            
                             self.hasFinishStatus ++;
                         }
                         self.allowNext = NO;
@@ -338,11 +347,9 @@
     
                 UIImage *trackIamge = [UIImage imageWithCGImage:videoImage];
                 trackIamge = [trackIamge rotate:UIImageOrientationRightMirrored];
-                self.savePic2CameraRollCount ++;
-                if (self.savePic2CameraRollCount == 3){
                     [self saveVideoToLibrary:trackIamge];
                     self.savePic2CameraRollCount = 0;
-                }
+    
                 CGImageRelease(videoImage);
     
     
@@ -377,7 +384,7 @@
                                                       dispatch_async(dispatch_get_main_queue(), ^{
                                                           
                                                           [alertCtr addAction:act1];
-                                                          [self presentViewController:alertCtr animated:YES completion:nil];
+//                                                          [self presentViewController:alertCtr animated:YES completion:nil];
                                                       });
                                                       
                                                       
